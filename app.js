@@ -1,22 +1,30 @@
-var config = require('./config.js'),
 
-    // https://github.com/JerrySievert/node-date-utils
-    DateUtils = require('date-utils'),
+var DateUtils = require('date-utils'),          // https://github.com/JerrySievert/node-date-utils
+    schedule = require('node-schedule'),        // https://github.com/mattpat/node-schedule
+    Lastfm = require('lastfm').LastFmNode;      // https://github.com/jammus/lastfm-node
 
-    // https://github.com/mattpat/node-schedule
-    schedule = require('node-schedule'),
+var config = {
+        api_key: process.env.API_KEY,
+        secret:  process.env.API_SECRET,
+        sk:      process.env.API_SESSION_KEY,
+    };
 
-    // https://github.com/jammus/lastfm-node
-    Lastfm = require('lastfm').LastFmNode,
+if (typeof config.api_key === "undefined") {
+    try {
+        config = require('./config.js');
+    } catch (ex) {
+        console.log('Error: Couldn\'t find a config. Set environment variables or create a config.js file using setup.js');
+    }
+}
 
-    lastfm = new Lastfm({
-        api_key: config.api_key,
-        secret: config.secret
-    }),
-    session = lastfm.session({key: config.sk}),
-    years = 1,
-    username = "last.hq";
+var lastfm = new Lastfm({
+    api_key: config.api_key,
+    secret: config.secret
+});
 
+var session = lastfm.session({key: config.sk});
+var years = 1;
+var username = "last.hq";
 var toScrobble = [];
 
 getScrobblesFromThisHourOnThisDayInTheYear();
