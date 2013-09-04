@@ -1,7 +1,8 @@
 
 var DateUtils = require('date-utils'),          // https://github.com/JerrySievert/node-date-utils
     schedule = require('node-schedule'),        // https://github.com/mattpat/node-schedule
-    Lastfm = require('lastfm').LastFmNode;      // https://github.com/jammus/lastfm-node
+    LastFmNode = require('lastfm').LastFmNode,  // https://github.com/jammus/lastfm-node
+    lastfm = require('./src/lastfm');
 
 var config = {
         api_key: process.env.API_KEY,
@@ -17,12 +18,8 @@ if (typeof config.api_key === "undefined") {
     }
 }
 
-var lastfm = new Lastfm({
-    api_key: config.api_key,
-    secret: config.secret
-});
+lastfm.start(new LastFmNode({api_key: config.api_key, secret: config.secret}), config.sk);
 
-var session = lastfm.session({key: config.sk});
 var years = 1;
 var username = "last.hq";
 var toScrobble = [];
@@ -39,53 +36,39 @@ function getScrobblesFromThisHourOnThisDayInTheYear() {
     var lowerBound = Math.floor(+thisTimelastYear/1000);
     var upperBound = Math.floor(+thisTimelastYear.clone().addHours(1) / 1000);
 
-    lastfm.request('user.getRecentTracks', {
-        user: username,
-        limit: 200,
-        from: lowerBound,
-        to: upperBound,
-        handlers: {
-            success: function(data) {
-                scheduleScrobbles(data.recenttracks.track);
-            },
-            error: function(error) {
-                console.log("Error: " + error.message);
-            }
+    lastfm.getScrobbles(username, lowerBound, upperBound, function(error, scrobbles) {
+        if ( ! error) {
+            scheduleScrobbles(scrobbles);
+        } else {
+            console.log("Error: " + error.message);
         }
     });
 }
 
-function scheduleScrobbles(tracks) {
-
-    if (! tracks) {
-        return;
-    }
-
-    if (! tracks instanceof Array) {
-        tracks = [tracks];
-    }
+function scheduleScrobbles(scrobbles) {
 
     // console.log(tracks.length);
 
-    for(var i = 0, l = tracks.length; i < l; i++) {
+    for(var i = 0, l = scrobbles.length; i < l; i++) {
 
-        var track = tracks[i];
+        var scrobble = scrobbles[i];
 
-        if (track['@attr']) {
+        // Ignore now playing tracks (which always get included).
+        if (scrobble['@attr']) {
             continue;
         }
 
-        var trackDate = new Date(track.date.uts * 1000).addYears(years);
-        var params = {
-                artist: track.artist['#text'],
-                track: track.name,
-                album: track.album['#text'],
-                timestamp: +trackDate / 1000,
-                time: trackDate.toString()
+        var shiftedScrobbleDate = new Date(scrobble.date.uts * 1000).addYears(years);
+        var shiftedScrobble = {
+                artist: scrobble.artist['#text'],
+                track: scrobble.name,
+                album: scrobble.album['#text'],
+                timestamp: +shiftedScrobbleDate / 1000,
+                time: shiftedScrobbleDate.toString()
             };
 
-        toScrobble.push(params);
-        schedule.scheduleJob(trackDate, scrobbleNext);
+        toScrobble.push(shiftedScrobble);
+        schedule.scheduleJob(shiftedScrobbleDate, scrobbleNext);
     }
 
     // console.log(toScrobble);
@@ -93,7 +76,7 @@ function scheduleScrobbles(tracks) {
 
 function scrobbleNext() {
     var scrobble = toScrobble.pop();
-    lastfm.update('scrobble', session, scrobble);
+    lastfm.scrobble(scrobble);
     nowPlayingNext();
 }
 
@@ -105,21 +88,13 @@ function nowPlayingNext() {
         return;
     }
 
-    var nowPlaying = toScrobble[l - 1];
-    var whenNowPlayingWillScrobble = new Date(nowPlaying.timestamp * 1000);
+    var nextScrobble = toScrobble[l - 1];
+    var whenNextTrackWillScrobble = new Date(nextScrobble.timestamp * 1000);
     var now = new Date();
 
-    if (now.getMinutesBetween(whenNowPlayingWillScrobble) > 10) {
+    if (now.getMinutesBetween(whenNextTrackWillScrobble) > 10) {
         return;
     }
 
-    lastfm.update('nowplaying', session,
-        {
-            artist: nowPlaying.artist,
-            track: nowPlaying.track,
-            album: nowPlaying.album,
-            duration: now.getSecondsBetween(whenNowPlayingWillScrobble)
-        }
-    );
-
+    lastfm.updateNowPlaying(nextScrobble, now.getSecondsBetween(whenNextTrackWillScrobble));
 }
