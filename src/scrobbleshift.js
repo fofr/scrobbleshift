@@ -59,7 +59,7 @@ var ScrobbleShift = function(scheduler, lastfm, username, yearsAgo) {
             scheduler.scheduleJob(shiftedScrobbleDate, scrobbleNext);
         }
 
-         console.log(toScrobble);
+        //console.log(toScrobble);
     }
 
     function scrobbleNext() {

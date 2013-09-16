@@ -1,7 +1,7 @@
 var scheduler     = require('node-schedule'),        // https://github.com/mattpat/node-schedule
     LastfmNode    = require('lastfm').LastFmNode,    // https://github.com/jammus/lastfm-node
     Lastfm        = require('./src/lastfm'),
-    ScrobbleShift = require('./src/scrobbleShift');
+    ScrobbleShift = require('./src/scrobbleshift');
 
 var config = {
         api_key: process.env.API_KEY,
