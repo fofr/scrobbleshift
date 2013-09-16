@@ -1,6 +1,6 @@
 var scheduler     = require('node-schedule'),        // https://github.com/mattpat/node-schedule
-    LastfmNode    = require('lastfm').LastFmNode,   // https://github.com/jammus/lastfm-node
-    Lastfm        = require('./src/lastfm');
+    LastfmNode    = require('lastfm').LastFmNode,    // https://github.com/jammus/lastfm-node
+    Lastfm        = require('./src/lastfm'),
     ScrobbleShift = require('./src/scrobbleShift');
 
 var config = {
