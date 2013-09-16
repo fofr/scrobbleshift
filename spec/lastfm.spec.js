@@ -1,4 +1,5 @@
-var lastfm = require('../src/lastfm.js'),
+var Lastfm = require('../src/lastfm.js'),
+    lastfm,
     lastfmNodeInstance = {
         session: function() { return {}; },
         request: function() {},
@@ -10,7 +11,7 @@ describe("A Lastfm module", function() {
     it('should create a session when started', function() {
 
         spyOn(lastfmNodeInstance, 'session');
-        lastfm.start(lastfmNodeInstance, "key");
+        Lastfm.create(lastfmNodeInstance, "key");
         expect(lastfmNodeInstance.session).toHaveBeenCalledWith({key: "key"});
     });
 
@@ -20,7 +21,7 @@ describe("A Lastfm module", function() {
 
         beforeEach(function() {
             callback = jasmine.createSpy();
-            lastfm.start(lastfmNodeInstance, "key");
+            lastfm = Lastfm.create(lastfmNodeInstance, "key");
         });
 
         it('asks for scrobbles within the specified time range', function() {
@@ -89,7 +90,7 @@ describe("A Lastfm module", function() {
     it('can scrobble the provided track', function() {
 
         spyOn(lastfmNodeInstance, 'update');
-        lastfm.start(lastfmNodeInstance, "key");
+        lastfm = Lastfm.create(lastfmNodeInstance, "key");
 
         lastfm.scrobble({"scrobble": "track"});
 
@@ -99,7 +100,7 @@ describe("A Lastfm module", function() {
     it('can update now playing with the provided track', function() {
 
         spyOn(lastfmNodeInstance, 'update');
-        lastfm.start(lastfmNodeInstance, "key");
+        lastfm = Lastfm.create(lastfmNodeInstance, "key");
 
         lastfm.updateNowPlaying({artist: "artistName", track: "trackName", album: "albumName"}, 10);
 
