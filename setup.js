@@ -30,16 +30,6 @@ if (process.argv.length < 4) {
                             success: function(data) {
                                 var sk = data.session.key;
                                 console.log("We got a session key:", sk);
-
-                                var config = fs.readFileSync('config.default.js').toString();
-
-                                config = config.replace(/<API_KEY>/g, api_key)
-                                               .replace(/<API_SECRET>/g, secret)
-                                               .replace(/<API_SESSION_KEY>/g, sk);
-
-                                fs.writeFileSync('config.js', config);
-
-                                console.log("Done - config file written");
                             },
 
                             error: function(error) {
