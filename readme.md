@@ -22,10 +22,10 @@ Setup
 * Create a Last.fm API account at http://last.fm/api
 * Sign up a Last.fm user account to scrobble to at http://last.fm/join
 * Configure node environment variables, see: config.default.env
-** I’m using Heroku and Foreman locally, see: https://devcenter.heroku.com/articles/config-vars#local-setup
-** The app needs at least one session key config variable, setup.js is a helper for this. Run:
+    * I’m using Heroku and Foreman locally, see: https://devcenter.heroku.com/articles/config-vars#local-setup
+    * The app needs at least one session key config variable, setup.js is a helper for this. Run:
 
-    node setup.js <API_KEY> <API_SECRET>
+    `node setup.js API_KEY API_SECRET`
 
 Tests
 ---------------------
