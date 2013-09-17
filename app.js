@@ -4,13 +4,21 @@ var scheduler     = require('node-schedule'),        // https://github.com/mattp
     ScrobbleShift = require('./src/scrobbleshift');
 
 var config = {
-        api_key: process.env.API_KEY,
-        secret:  process.env.API_SECRET,
-        sk:      process.env.API_SESSION_KEY,
+        api_key:    process.env.API_KEY,
+        secret:     process.env.API_SECRET,
+        sk:         process.env.API_SESSION_KEY,
+        username:   process.env.USERNAME,
+        years:      process.env.YEARS || 1
     };
 
 var lastfmNode = new LastfmNode({api_key: config.api_key, secret: config.secret});
-var lastfm = Lastfm.create(lastfmNode, config.sk);
-var scrobbleShift = ScrobbleShift.create(scheduler, lastfm, "last.hq", 1);
 
-scrobbleShift.start();
+for(var i = 1; i <= config.years; i++) {
+
+    // eg. process.env.API_SESSION_KEY_YEAR_1
+    var sk = process.env['API_SESSION_KEY_YEAR_' + i],
+        lastfm = Lastfm.create(lastfmNode, sk),
+        scrobbleShift = ScrobbleShift.create(scheduler, lastfm, config.username, i);
+
+    scrobbleShift.start();
+}
