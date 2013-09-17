@@ -1,5 +1,6 @@
 var scheduler     = require('node-schedule'),        // https://github.com/mattpat/node-schedule
     LastfmNode    = require('lastfm').LastFmNode,    // https://github.com/jammus/lastfm-node
+    DateUtils     = require('date-utils'),           // https://github.com/JerrySievert/node-date-utils
     Lastfm        = require('./src/lastfm'),
     ScrobbleShift = require('./src/scrobbleshift');
 
@@ -20,5 +21,7 @@ for(var i = 1; i <= config.years; i++) {
         lastfm = Lastfm.create(lastfmNode, sk),
         scrobbleShift = ScrobbleShift.create(scheduler, lastfm, config.username, i);
 
-    scrobbleShift.start();
+    // Stagger start times
+    var startTime = new Date().addMinutes(i - 1);
+    scheduler.scheduleJob(startTime, scrobbleShift.start);
 }
