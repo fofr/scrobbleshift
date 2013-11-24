@@ -1,6 +1,6 @@
 {
     "name": "scrobbleshift",
-    "description": "",
+    "description": "Shift your Last.fm scrobbles in time, to a new account.",
     "version": "0.0.1",
     "private": true,
     "dependencies": {
